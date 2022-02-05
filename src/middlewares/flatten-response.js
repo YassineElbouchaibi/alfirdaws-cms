@@ -1,3 +1,5 @@
+const fs = require("fs");
+
 const normalize = (data) => {
   const isObject = (data) =>
     Object.prototype.toString.call(data) === "[object Object]";
@@ -47,20 +49,51 @@ const fixTypeDefName = (name) => {
   return name;
 };
 
-const fixTypeRefName = ({ ofType, name, ...data }) => {
-  if (ofType != null) {
-    ofType = fixTypeRefName(ofType);
+const fixTypeRefName = (typeDef) => {
+  if (
+    typeDef.name != null &&
+    typeDef.name.endsWith("EntityResponseCollection")
+  ) {
+    typeDef.ofType = {
+      kind: "NON_NULL",
+      name: null,
+      ofType: {
+        kind: "OBJECT",
+        name: typeDef.name.replace("EntityResponseCollection", ""),
+        ofType: null,
+      },
+    };
+    typeDef.kind = "LIST";
+    typeDef.name = null;
+
+    return typeDef;
   }
 
-  if (name != null) {
-    name = fixTypeDefName(name);
+  if (typeDef.ofType != null) {
+    typeDef.ofType = fixTypeRefName(typeDef.ofType);
   }
 
-  return {
-    ...data,
-    name,
-    ofType,
+  if (typeDef.name != null) {
+    typeDef.name = fixTypeDefName(typeDef.name);
+  }
+
+  return typeDef;
+};
+
+const fixTypeDef = (typeDef) => {
+  const fixedType = {
+    ...typeDef,
+    name: fixTypeDefName(typeDef.name),
   };
+
+  fixedType.fields = typeDef.fields.map((y) => ({
+    ...y,
+    type: {
+      ...fixTypeRefName(y.type),
+    },
+  }));
+
+  return fixedType;
 };
 
 const respond = async (ctx, next) => {
@@ -87,8 +120,10 @@ const respond = async (ctx, next) => {
     parsedBody.data.__schema.types = parsedBody.data.__schema.types
       .filter((x) => !x.name.endsWith("Entity"))
       .filter((x) => !x.name.endsWith("EntityResponse"))
+      .filter((x) => !x.name.endsWith("EntityResponseCollection"))
       .map((x) => {
         if (x.fields == null) return x;
+        if (x.name == null) return x;
 
         if (x.name === "Query" || x.name === "Mutation") {
           return {
@@ -102,17 +137,11 @@ const respond = async (ctx, next) => {
           };
         }
 
-        return {
-          ...x,
-          name: fixTypeDefName(x.name),
-          fields: x.fields.map((y) => ({
-            ...y,
-            type: {
-              ...fixTypeRefName(y.type),
-            },
-          })),
-        };
+        return fixTypeDef(x);
       });
+
+    // Uncomment to Debug: Dump parsedBody to a file
+    // fs.writeFileSync("./schema.json", JSON.stringify(parsedBody, null, 2));
 
     ctx.response.body = parsedBody;
     return;
