@@ -105,8 +105,8 @@ const respond = async (ctx, next) => {
       `API request (${ctx.url}) detected, transforming response json...`
     );
     ctx.response.body = {
-      data: flatten(ctx.response.body.data),
-      meta: ctx.response.body.meta,
+      ...ctx.response.body,
+      data: normalize(ctx.response.body.data),
     };
     return;
   }
@@ -154,7 +154,7 @@ const respond = async (ctx, next) => {
   ) {
     const parsedBody = JSON.parse(ctx.response.body);
 
-    if (parsedBody.data.__schema !== undefined) {
+    if (parsedBody.data == null || parsedBody.data.__schema !== undefined) {
       return;
     }
 
@@ -163,8 +163,8 @@ const respond = async (ctx, next) => {
     );
 
     ctx.response.body = {
+      ...parsedBody,
       data: normalize(parsedBody.data),
-      meta: parsedBody.meta,
     };
     return;
   }
