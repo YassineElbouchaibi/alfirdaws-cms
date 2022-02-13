@@ -1,4 +1,4 @@
-# Masjid Al Firdaws Web
+# Masjid Al Firdaws CMS
 
 [![CodeFactor](https://www.codefactor.io/repository/github/yassineelbouchaibi/alfirdaws-cms/badge)](https://www.codefactor.io/repository/github/yassineelbouchaibi/alfirdaws-cms)
 
