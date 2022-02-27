@@ -9767,6 +9767,11 @@ std-env@^2.2.1:
   dependencies:
     ci-info "^3.1.1"
 
+strapi-plugin-website-builder@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/strapi-plugin-website-builder/-/strapi-plugin-website-builder-2.0.2.tgz#6f5640579fb33bd51223aa1df87ff6634d8d0191"
+  integrity sha512-22qpFxx4eZWSEuSBiLZU1lUW2Vbaqa8RSRGRPzP2u5cubChzR1rJ6/s4aHd8TBZow0NGZMWScCQ3i4E7g0g5Qg==
+
 stream-browserify@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/stream-browserify/-/stream-browserify-3.0.0.tgz#22b0a2850cdf6503e73085da1fc7b7d0c2122f2f"
